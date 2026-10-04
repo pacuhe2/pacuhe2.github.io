@@ -1,0 +1,1 @@
+Copia aquí com.tesla.3p.public-key.pem (generado con ./tesla-setup.sh keys) y borra este fichero.

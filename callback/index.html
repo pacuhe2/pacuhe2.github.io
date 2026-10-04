@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TeslaSplit · Login</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0e1013; color: #eceef1; margin: 0; padding: 24px; }
+    .card { max-width: 520px; margin: 0 auto; background: #171a1f; border-radius: 14px; padding: 20px; }
+    a.btn, button { display: block; width: 100%; box-sizing: border-box; text-align: center; padding: 14px;
+      margin-top: 12px; border-radius: 10px; border: 0; font-size: 16px; text-decoration: none; cursor: pointer; }
+    a.btn { background: #3b82f6; color: #fff; }
+    button { background: #20242b; color: #eceef1; }
+    code { word-break: break-all; font-size: 13px; color: #9aa1ab; }
+    .err { color: #e5484d; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>TeslaSplit</h2>
+    <p id="msg">Procesando el retorno de Tesla…</p>
+    <a id="open" class="btn" href="#" hidden>Volver a TeslaSplit</a>
+    <button id="copy" hidden>Copiar URL para pegarla en la app</button>
+    <p><code id="raw"></code></p>
+  </div>
+  <script>
+    // Página estática: no envía nada a ningún servidor. Solo reenvía code+state a la app.
+    (function () {
+      var q = new URLSearchParams(location.search);
+      var msg = document.getElementById('msg');
+      if (q.get('error')) {
+        msg.className = 'err';
+        msg.textContent = 'Tesla devolvió un error: ' + q.get('error') + ' ' + (q.get('error_description') || '');
+        return;
+      }
+      if (!q.get('code')) { msg.textContent = 'No hay código en la URL.'; return; }
+      var query = '?code=' + encodeURIComponent(q.get('code')) + (q.get('state') ? '&state=' + encodeURIComponent(q.get('state')) : '');
+      var deep = 'teslasplit://oauth/callback' + query;
+      var intentUrl = 'intent://oauth/callback' + query + '#Intent;scheme=teslasplit;package=com.teslasplit;end';
+      var isAndroid = /Android/i.test(navigator.userAgent);
+      var open = document.getElementById('open');
+      open.href = isAndroid ? intentUrl : deep;
+      open.hidden = false;
+      msg.textContent = 'Login correcto. Pulsa el botón para volver a la app.';
+      document.getElementById('raw').textContent = location.href;
+      var copy = document.getElementById('copy');
+      copy.hidden = false;
+      copy.onclick = function () {
+        navigator.clipboard.writeText(location.href).then(function () { copy.textContent = 'Copiado ✓'; });
+      };
+      // Intento automático (algunos navegadores exigen pulsar el botón)
+      setTimeout(function () { location.href = open.href; }, 300);
+    })();
+  </script>
+</body>
+</html>
